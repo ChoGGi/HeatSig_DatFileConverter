@@ -1,17 +1,26 @@
-### Save file convertor for the game Heat Signature
-http://www.heatsig.com
-http://store.steampowered.com/app/268130/
+### Save file convertor for the game [Heat Signature](http://www.heatsig.com)
+https://store.steampowered.com/app/268130/
+
 
 ### No warranty implied or otherwise!
 
 If Heat Signature changes around how the files are saved you could lose your files, so always backup before doing anything.
 I tried to make it safe, but you get what you pay for.
-As of Sep 25 2017, this works with all dat files (be wary using it after an update to HS).
+As of Sep 26 2017, this works with all dat files
+be wary using it if there's any update notes mentioning changes to saves
 
 ### How to:
 run DatFileConverter.exe
 double click to decode/encode, double right-click to send file to recycle bin.
-See DatFileConverter.ini for some options (pick editor, scan steam workshop saves)
+### DatFileConverter.ini:
+Change the default editor
+Stop it from asking you everytime you send a file to the recycle bin
+Stop it from scanning Steam workshop files (from other people)
+
+### Save files:
+Save files are located in %APPDATA%\Heat_Signature
+Characters are in "Galaxy 1\Characters" (or 2 or 3)
+Retired items/Captured characters are in "Workshop" folder
 
 ### Misc:
 You can also drag and drop dat/txt files on the exe to convert without GUI
@@ -21,6 +30,3 @@ You can also drag and drop dat/txt files on the exe to convert without GUI
   Start game
 You can drop both dat and txt files at the same time.
 
-Save files are located in %APPDATA%\Heat_Signature
-Characters are in "Galaxy 1\Characters" (or 2 or 3)
-Retired items/Captured characters are in "Workshop" folder
