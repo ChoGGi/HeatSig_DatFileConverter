@@ -1,3 +1,6 @@
 #git rm -r --cached .
 #git add .
 #git reset HEAD
+
+#shortcuts
+.gitignore
