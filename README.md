@@ -26,10 +26,10 @@ Retired items/Captured characters are in "Workshop" folder
 
 ### Misc:
 You can also drag and drop dat/txt files on the exe to convert without GUI
-  Drop save.dat on exe
-  Edit save.dat.txt file
-  Drop save.dat.txt file on exe
-  Start game
+*  Drop save.dat on exe
+*  Edit save.dat.txt file
+*  Drop save.dat.txt file on exe
+*  Start game
 You can drop both dat and txt files at the same time.
 
 
