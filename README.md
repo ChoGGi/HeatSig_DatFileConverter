@@ -32,3 +32,7 @@ You can also drag and drop dat/txt files on the exe to convert without GUI
   Start game
 You can drop both dat and txt files at the same time.
 
+
+
+Uses base64 code from https://github.com/ahkscript/libcrypt.ahk
+
