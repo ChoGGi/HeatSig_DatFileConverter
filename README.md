@@ -31,6 +31,7 @@ Characters are in "Galaxy 1\Characters" (or 2 or 3)
 Retired items/Captured characters are in "Workshop" folder
 ```
 ### Misc:
+```
 You can also drag and drop dat/txt files on the exe to convert without GUI
 *  Drop save.dat on exe
 *  Edit save.dat.txt file
@@ -41,4 +42,4 @@ You can drop both dat and txt files at the same time.
 
 
 Uses base64 code from https://github.com/ahkscript/libcrypt.ahk
-
+```
