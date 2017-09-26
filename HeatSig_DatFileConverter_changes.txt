@@ -1,0 +1,15 @@
+v0.0.6
+Wasn't closing after drag and drop
+Added option to ini to choose whether to load Steam Workshop saves
+v0.0.5
+Now checks in Steam workshop folder for Retired items/Captured characters
+Added a button to re-edit already converted files
+v0.0.4
+Added a GUI ;)
+See DatFileConverter.ini for some basic options
+v0.0.3
+Combined Encode/Decode into DatFileConverter
+Shows file select dialog if you open it without dropping a file on it
+v0.0.2
+Made the exes 32bit
+Added a message if you open it without dropping a file on it
