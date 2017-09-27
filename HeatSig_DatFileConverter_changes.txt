@@ -13,3 +13,7 @@ Shows file select dialog if you open it without dropping a file on it
 v0.0.2
 Made the exes 32bit
 Added a message if you open it without dropping a file on it
+
+
+
+https://github.com/ChoGGi/HeatSig_DatFileConverter
