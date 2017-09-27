@@ -9,7 +9,7 @@ https://store.steampowered.com/app/268130/
 ```
 If Heat Signature changes around how the files are saved you could lose your files, so always backup before doing anything.
 I tried to make it safe, but you get what you pay for.
-As of Sep 26 2017, this works with all dat files
+Last tested on v2017.09.26.1
 be wary using it if there's any update notes mentioning changes to saves
 ```
 
