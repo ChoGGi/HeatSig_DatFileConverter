@@ -443,7 +443,7 @@ fInputFiles(sInputFile)
   ;encoded file we want to decode
   Else if (sChkNameE = ".dat" || sChkNameD = ".dat.old")
     {
-    if (InStr(sSaveGame,"U3RlYW1JRCA9") > 0 || InStr(sSaveGame,"PENoYXJhY3Rlcj4=") > 0
+    If (InStr(sSaveGame,"U3RlYW1JRCA9") > 0 || InStr(sSaveGame,"PENoYXJhY3Rlcj4=") > 0
         || InStr(sSaveGame,"PEl0ZW0+") > 0 || InStr(sSaveGame,"Rmlyc3RMYXVuY2gg") > 0)
       {
       sNewExt := fSaveDecodeText(sInputFile,sSaveGame)
