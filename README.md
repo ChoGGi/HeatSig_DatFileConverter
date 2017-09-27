@@ -15,14 +15,17 @@ be wary using it if there's any update notes mentioning changes to saves
 
 ### How to:
 ```
-run DatFileConverter.exe
-double click to decode/encode, double right-click to send file to recycle bin.
+Start DatFileConverter.exe
+Double click a file to open it in the editor
+You can double right-click in the list to send a file to the recycle bin.
+You can also drop files on DatFileConverter.exe to quickly convert
 ```
 ### DatFileConverter.ini:
 ```
-Change the default editor
-Stop it from asking you everytime you send a file to the recycle bin
+Change the editor to an executable (if you change the editor; dbl-click converts the file then opens it in editor)
+Stop it from asking you every time you send a file to the recycle bin
 Stop it from scanning Steam workshop files (from other people)
+Stop it from refreshing file list after deleting/converting files
 ```
 ### Save files:
 ```
