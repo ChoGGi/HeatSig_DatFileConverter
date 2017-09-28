@@ -13,9 +13,6 @@ I tried to make it safe, but you get what you pay for.
 be wary using it if there's any update notes mentioning changes to saves
 ```
 
-![Alt text](/images/MainWin.jpg?raw=true "Main Window")
-![Alt text](/images/EditWin.jpg?raw=true "Editor Window")
-
 ### How to:
 ```
 Start DatFileConverter.exe
@@ -46,6 +43,9 @@ You can also drag and drop dat/txt files on the exe to convert without GUI
 You can drop both dat and txt files at the same time.
 
 
-
 Uses base64 code from https://github.com/ahkscript/libcrypt.ahk
 ```
+
+![Alt text](/images/MainWin.jpg?raw=true "Main Window")
+![Alt text](/images/EditWin.jpg?raw=true "Editor Window")
+
