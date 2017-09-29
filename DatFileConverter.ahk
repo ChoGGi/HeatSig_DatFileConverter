@@ -1,7 +1,7 @@
 #NoEnv
 #NoTrayIcon
 ;#SingleInstance Force
-#SingleInstance Ignore
+#SingleInstance Off
 #KeyHistory 0
 SetBatchLines -1
 Process Priority,,A
@@ -278,7 +278,8 @@ fEditorGUI(sDir,sFile,sExt)
     sButtonSaveFile := sFile sExt ".txt"
   Else
     sButtonSaveFile := sFile sExt
-  Gui Add,Button,xm ym +Disabled glButtonSaveFile vsButtonSaveFile,&Save as %sButtonSaveFile%
+  Gui Add,Button,xm ym glButtonSaveFile vsButtonSaveFile,&Save as %sButtonSaveFile%
+
   If (SubStr(sFile sExt,-7) = ".dat.txt")
     sButtonSaveDatFile := sFile
   Else If (sExt = ".old")
@@ -287,7 +288,8 @@ fEditorGUI(sDir,sFile,sExt)
     sButtonSaveDatFile := sFile sExt ".dat"
   Else
     sButtonSaveDatFile := sFile sExt
-  Gui Add,Button,x+m +Disabled glButtonSaveDatFile vsButtonSaveDatFile,&Save as %sButtonSaveDatFile%
+  Gui Add,Button,x+m glButtonSaveDatFile vsButtonSaveDatFile,&Save as %sButtonSaveDatFile%
+
   Gui Add,Button,x+m glButtonSaveFileAs vsButtonSaveFileAs,&Save as...
   Gui Add,Button,xp+200 glButtonClose vsButtonClose,&Close
   Gui Add,Edit,r30 xm w700 glFileEditor vsFileEditor,%sInputText%
