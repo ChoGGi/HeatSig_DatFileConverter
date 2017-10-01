@@ -222,12 +222,19 @@ Return
 lButtonSaveFileAs:
   Gui Submit,NoHide
   FileSelectFile sSelectedFile,S24,%sButtonSaveFileAs%,Save file as .txt or .dat,txt or dat (*.txt; *.dat)
+  ;if user didn't cancel, etc
   If (sSelectedFile != "")
     {
+    ;if .dat re-encode
     If (SubStr(sSelectedFile,-3) = ".dat")
       fSaveEncodeText(sSelectedFile ".txt",sFileEditor)
+    ;Else If (SubStr(sSelectedFile,-7) = ".dat.old")
+    ;else overwrite old file
     Else
+      {
+      FileDelete %sSelectedFile%
       FileAppend %sFileEditor%,%sSelectedFile%
+      }
     }
 Return
 
