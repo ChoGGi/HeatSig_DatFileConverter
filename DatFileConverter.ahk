@@ -1,7 +1,7 @@
 #NoEnv
 #NoTrayIcon
-#SingleInstance Force
-;#SingleInstance Off
+;#SingleInstance Force
+#SingleInstance Off
 #KeyHistory 0
 SetBatchLines -1
 Process Priority,,A
