@@ -1,7 +1,7 @@
 #NoEnv
 #NoTrayIcon
-;#SingleInstance Force
-#SingleInstance Off
+#SingleInstance Force
+;#SingleInstance Off
 #KeyHistory 0
 SetBatchLines -1
 Process Priority,,A
@@ -24,7 +24,7 @@ Else ;loop through input file(s)
   }
 Return
 
-Global sHeatSigFiles,sSteamLoc,sWorkshopFiles,ScanSteamWorkshop,Editor
+Global sHeatSigFiles,sSteamLoc,sWorkshopFiles,ScanSteamWorkshop,Editor,sSelectedTreeText
 
 lStartGUI:
   sScriptName := A_ScriptDir "\" SubStr(A_ScriptName,1,-3) "ini"
@@ -56,7 +56,7 @@ lStartGUI:
   ;Gui Add,ListView,x+m r20 glMyListView vsMyListView w%iListViewWidth%,Name|Modified|File
   Gui Add,ListView,x+m r20 glMyListView vsMyListView w20,Name|Modified|File
   ;toolips for elements
-  sButtonRefresh_TT := "Refreshes file list"
+  sButtonRefresh_TT := "Refreshes view"
   sButtonEdit_TT := "Edits first selected file"
   sButtonRecycleOld_TT := "Any .dat.old files in current folder are sent to the Recycle Bin"
   sButtonConvert_TT := "Converts selected files`nUse Ctrl+Click to select multiple files`n`nWARNING: If you select file.dat and file.dat.txt, then this will convert from the top of the list down (probably overwriting the wrong file)!"
@@ -83,8 +83,14 @@ lStartGUI:
 Return
 
 lMyTreeView:
+  sTreeItem := fSelectTreeItem()
+  fPopulateListView(sTreeItem)
+Return
+
 lButtonRefresh:
   sTreeItem := fSelectTreeItem()
+  fPopulateTreeView(sTreeItem)
+  Sleep 100
   fPopulateListView(sTreeItem)
 Return
 
@@ -277,7 +283,7 @@ fEditorGUI(sDir,sFile,sExt)
       sInputText := fDecodeText(sInputText)
     }
 
-  Gui oEditorWin:New,+LastFound +Resize +OwnDialogs,Editing %sFile%%sExt%
+  Gui oEditorWin:New,+LastFound +Resize +OwnDialogs,Editing %sDir%\%sFile%%sExt%
 
   If (sExt = ".dat")
     sButtonSaveFile := sFile sExt ".txt"
@@ -318,7 +324,7 @@ fBoolToggle(bBool)
   Return bBool
   }
 
-fPopulateTreeView()
+fPopulateTreeView(sSelectedItem = 0)
   {
   TV_Delete()
   GuiControl -Redraw,sMyTreeView
@@ -331,6 +337,27 @@ fPopulateTreeView()
     }
   SplashTextOff
   GuiControl +Redraw,sMyTreeView
+  If (sSelectedItem != 0)
+    {
+    iItemID := 0
+    Loop
+      {
+      iItemID := TV_GetNext(iItemID,"Full")
+      If not iItemID
+        Break
+      TV_GetText(sItemText,iItemID)
+      TV_GetText(sParentText,TV_GetParent(iItemID))
+      iParentID := TV_GetParent(iItemID)
+      TV_GetText(sGrandParentText,TV_GetParent(iParentID))
+      ;found what we're looking for
+      If (sParentText "\" sItemText = sSelectedTreeText
+          || sGrandParentText "\" sParentText "\" sItemText = sSelectedTreeText)
+        {
+        TV_Modify(iItemID)
+        Break
+        }
+      }
+    }
   }
 
 fAddSubFoldersToTree(sFolder,iParentItemID = 0,bHSFiles = False)
@@ -371,6 +398,8 @@ fSelectTreeItem()
           sSelectedFullPath := sDirPath
         }
       }
+  If (sSelectedItemText != "")
+    sSelectedTreeText := sSelectedItemText
   Return sSelectedFullPath
   }
 
@@ -469,6 +498,7 @@ fInputFiles(sInputFile)
 
 fDecodeText(sText)
   {
+  sOutFile := ""
   ;loop through each line and decode it
   Loop Parse,sText,`n,`r
     {
@@ -500,6 +530,7 @@ fSaveDecodeText(sInputFile,sSaveGame)
 
 fEncodeText(sText)
   {
+  sOutFile := ""
   Loop Parse,sText,`n,`r
     {
     If (fCheckText(A_LoopField,A_Index) = True)

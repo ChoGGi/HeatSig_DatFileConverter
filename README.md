@@ -6,19 +6,17 @@ https://store.steampowered.com/app/268130/
 
 ### No warranty implied or otherwise!
 ##### Tested on version 2017.09.29.2
-
 ```
 If Heat Signature changes around how the files are saved you could lose your files, so always backup before doing anything.
 I tried to make it safe, but you get what you pay for.
 be wary using it if there's any update notes mentioning changes to saves
 ```
-
 ### How to:
 ```
 Start DatFileConverter.exe
 Double click a file to open it in the editor
 You can double right-click in the list to send a file to the recycle bin.
-You can also drop files on DatFileConverter.exe to quickly convert
+You can also drop files on DatFileConverter.exe to convert without opening the GUI.
 ```
 ### DatFileConverter.ini:
 ```
@@ -45,7 +43,5 @@ You can drop both dat and txt files at the same time.
 
 Uses base64 code from https://github.com/ahkscript/libcrypt.ahk
 ```
-
 ![Alt text](/images/MainWin.jpg?raw=true "Main Window")
 ![Alt text](/images/EditWin.jpg?raw=true "Editor Window")
-
