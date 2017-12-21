@@ -27,11 +27,23 @@ Return
 Global sHeatSigFiles,sSteamLoc,sWorkshopFiles,ScanSteamWorkshop,Editor,sSelectedTreeText
 
 lStartGUI:
+  ;PID of script...
+  iScript_PID := DllCall("GetCurrentProcessId")
+
   sScriptName := A_ScriptDir "\" SubStr(A_ScriptName,1,-3) "ini"
   IniRead Editor,%sScriptName%,Settings,Editor,%A_Space%
   IniRead DisableWarnings,%sScriptName%,Settings,DisableWarnings,0
   IniRead ScanSteamWorkshop,%sScriptName%,Settings,ScanSteamWorkshop,1
   IniRead ManualRefresh,%sScriptName%,Settings,ManualRefresh,0
+  IniRead sWinPos,%sScriptName%,Settings,WinPos,0:0
+  sArray := StrSplit(sWinPos,":")
+  iXPos := sArray[1]
+  iYPos := sArray[2]
+  ;keep GUI on screen
+  If (iYPos > A_ScreenHeight)
+    iYPos := A_ScreenHeight // 3
+  If (iXPos > A_ScreenWidth)
+    iXPos := A_ScreenWidth // 3
 
   ;Shamelessly borrowed/edited from Autohotkey help (tree/listview example)
   sHeatSigFiles := A_APPDATA "\Heat_Signature"
@@ -77,7 +89,7 @@ lStartGUI:
   sTreeItem := fSelectTreeItem()
   fPopulateListView(sTreeItem)
 
-  Gui Show,w570,%sHeatSigFiles%
+  Gui Show,w570 x%iXPos% y%iYPos%,%sHeatSigFiles%
   ;for tooltips
   OnMessage(0x200,"WM_MOUSEMOVE")
 Return
@@ -200,6 +212,13 @@ fStartEditor(sDir,sFile,sExt)
 
 GuiEscape:
 GuiClose:
+  WinGetPos iXPosT,iYPosT,,,ahk_pid %iScript_PID%
+  If (iXPosT)
+    iXPos := iXPosT
+  If (iYPosT)
+    iYPos := iYPosT
+  sWinPos := iXPos ":" iYPos
+  IniWrite %sWinPos%,%sScriptName%,Settings,WinPos
 ExitApp
 
 lButtonClose:
