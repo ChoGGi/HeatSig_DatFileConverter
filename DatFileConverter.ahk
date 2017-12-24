@@ -31,6 +31,11 @@ lStartGUI:
   iScript_PID := DllCall("GetCurrentProcessId")
 
   sScriptName := A_ScriptDir "\" SubStr(A_ScriptName,1,-3) "ini"
+  If !FileExist(sScriptName)
+    {
+    sText := "[Settings]`r`n`r`n;Leave blank to use built-in editor`r`n;R:\SciTe\SciTeStart.exe`r`n;Notepad.exe`r`nEditor=`r`n`r`n;Ask before recycling files`r`nDisableWarnings=0`r`n`r`n;If you have added a bunch of friends to share saves, then it could be a long list`r`nScanSteamWorkshop=1`r`n`r`n;If you don't want it to refresh the view after deleting/converting files`r`nManualRefresh=0`r`n`r`n;Window Position`r`nWinPos=0:0`r`n"
+    FileAppend %sText%,%sScriptName%
+    }
   IniRead Editor,%sScriptName%,Settings,Editor,%A_Space%
   IniRead DisableWarnings,%sScriptName%,Settings,DisableWarnings,0
   IniRead ScanSteamWorkshop,%sScriptName%,Settings,ScanSteamWorkshop,1

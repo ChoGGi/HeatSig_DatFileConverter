@@ -1,5 +1,6 @@
 v0.0.9
 Saves window position
+creates ini if none exists
 v0.0.8
 Save As was appending rather than overwriting .txt/.old
 v0.0.7
