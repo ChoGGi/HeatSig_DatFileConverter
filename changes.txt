@@ -1,5 +1,9 @@
+v0.1.0
+...
 v0.0.9
 Saves window position
+Creates ini if none exists
+Refresh will now also refresh file tree
 v0.0.8
 Save As was appending rather than overwriting .txt/.old
 v0.0.7
