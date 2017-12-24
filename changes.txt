@@ -1,3 +1,5 @@
+v0.0.9
+Saves window position
 v0.0.8
 Save As was appending rather than overwriting .txt/.old
 v0.0.7
