@@ -1,27 +1,26 @@
 #NoEnv
+#KeyHistory 0
 #NoTrayIcon
 ;#SingleInstance Force
 #SingleInstance Off
-#KeyHistory 0
 SetBatchLines -1
-Process Priority,,A
 ListLines Off
+AutoTrim Off
+Process Priority,,A
 
 ;no files dropped on exe so we open GUI
-If %0% = 0
+If !A_Args.Length()
   GoSub lStartGUI
 Else ;loop through input file(s)
   {
-  Loop %0%
+  For iIndex,sInputFile in A_Args
     {
-    Loop % %A_Index%,1
-      {
-      If (InStr(FileExist(A_LoopFileLongPath),"D") = 0)
-        fInputFiles(A_LoopFileLongPath)
-      }
+    Loop Files,%sInputFile%,F
+      fInputFiles(A_LoopFileLongPath)
     }
   ExitApp
   }
+
 Return
 
 Global sHeatSigFiles,sSteamLoc,sWorkshopFiles,ScanSteamWorkshop,Editor,sSelectedTreeText
@@ -45,9 +44,9 @@ lStartGUI:
   iXPos := sArray[1]
   iYPos := sArray[2]
   ;keep GUI on screen
-  If (iYPos > A_ScreenHeight)
+  If iYPos > %A_ScreenHeight%
     iYPos := A_ScreenHeight // 3
-  If (iXPos > A_ScreenWidth)
+  If iXPos > %A_ScreenWidth%
     iXPos := A_ScreenWidth // 3
 
   ;Shamelessly borrowed/edited from Autohotkey help (tree/listview example)
@@ -76,10 +75,10 @@ lStartGUI:
   sButtonRefresh_TT := "Refreshes view"
   sButtonEdit_TT := "Edits first selected file"
   sButtonRecycleOld_TT := "Any .dat.old files in current folder are sent to the Recycle Bin"
-  sButtonConvert_TT := "Converts selected files`nUse Ctrl+Click to select multiple files`n`nWARNING: If you select file.dat and file.dat.txt, then this will convert from the top of the list down (probably overwriting the wrong file)!"
+  sButtonConvert_TT := "Converts selected files`nUse Ctrl+Click to select multiple files`n`nWARNING: If you select name.dat and name.dat.txt:`nThis will convert from the top of the list down (likely overwriting the wrong file)!"
   sCheckboxScanSteam_TT := "Adds files from friends (from Steam Workshop)"
   sCheckboxManRefresh_TT := "Only refresh file list when you click Refresh List"
-  sMyListView_TT := "Double click to Decode/Encode`nDouble right-click to Recycle."
+  sMyListView_TT := "Double click to Edit or Decode/Encode`nDouble right-click to Recycle."
 
   iCol2Width := 105
   ;LV_ModifyCol(1, iListViewWidth - iCol2Width + 120)
@@ -644,7 +643,7 @@ WM_MOUSEMOVE()
   {
   Static CurrControl,PrevControl,_TT
   CurrControl := A_GuiControl
-  If (CurrControl <> PrevControl and not InStr(CurrControl, " "))
+  If (CurrControl != PrevControl && !InStr(CurrControl, " "))
     {
     ToolTip
     SetTimer DisplayToolTip,1000
