@@ -260,7 +260,6 @@ lButtonSaveFileAs:
     ;if .dat re-encode
     If SubStr(sSelectedFile,-3) = .dat
       fSaveEncodeText(sSelectedFile ".txt",sFileEditor)
-    ;Else If (SubStr(sSelectedFile,-7) = ".dat.old")
     ;else overwrite old file
     Else
       {
@@ -310,23 +309,16 @@ fEditorGUI(sDir,sFile,sExt)
     }
 
   Gui oEditorWin:New,+LastFound +Resize +OwnDialogs,Editing %sDir%\%sFile%%sExt%
+  sButtonSaveFile := (sExt = ".dat" ? sFile sExt ".txt"
+    : sExt = ".old" ? sFile sExt ".txt"
+    : sFile sExt)
 
-  If sExt = .dat
-    sButtonSaveFile := sFile sExt ".txt"
-  Else If sExt = .old
-    sButtonSaveFile := sFile sExt ".txt"
-  Else
-    sButtonSaveFile := sFile sExt
   Gui Add,Button,xm ym glButtonSaveFile vsButtonSaveFile,&Save as %sButtonSaveFile%
+  sButtonSaveDatFile := (SubStr(sFile sExt,-7) = ".dat.txt" ? sFile
+    : sExt = ".old" ? sFile sExt ".dat"
+    : sExt = ".txt" ? sFile sExt ".dat"
+    : sFile sExt)
 
-  If SubStr(sFile sExt,-7) = .dat.txt
-    sButtonSaveDatFile := sFile
-  Else If sExt = .old
-    sButtonSaveDatFile := sFile sExt ".dat"
-  Else If sExt = .txt
-    sButtonSaveDatFile := sFile sExt ".dat"
-  Else
-    sButtonSaveDatFile := sFile sExt
   Gui Add,Button,x+m glButtonSaveDatFile vsButtonSaveDatFile,&Save as %sButtonSaveDatFile%
 
   Gui Add,Button,x+m glButtonSaveFileAs vsButtonSaveFileAs,&Save as...
@@ -343,11 +335,7 @@ fEditorGUI(sDir,sFile,sExt)
 
 fBoolToggle(bBool)
   {
-  If bBool
-    bBool := 0
-  Else
-    bBool := 1
-  Return bBool
+  Return (bBool ? 0 : 1)
   }
 
 fPopulateTreeView(sSelectedItem = 0)
@@ -548,10 +536,7 @@ fSaveDecodeText(sInputFile,sSaveGame)
   FileDelete %sInputFile%.txt
   FileAppend %sOutFile%,%sInputFile%.txt
   ;for editing newly created file
-  If SubStr(sInputFile,-7) = .dat.old
-    Return ".old.txt"
-  Else
-    Return ".dat.txt"
+  Return (SubStr(sInputFile,-7) = .dat.old ? ".old.txt" : ".dat.txt")
   }
 
 fEncodeText(sText)
@@ -575,12 +560,9 @@ fSaveEncodeText(sInputFile,sSaveGame)
   sOutFile := fEncodeText(sSaveGame)
   ;get filename for rename/replace
   sNewString := sInputFile
-  If InStr(sNewString,".dat.txt") > 0
-    sExt := InStr(sNewString,".dat.txt")
-  Else
-    sExt := InStr(sNewString,".old.txt")
-  StringLeft sNewString,sNewString,% sExt
-  sNewString := sNewString "dat"
+  sExt := (InStr(sNewString,".dat.txt") ? InStr(sNewString,".dat.txt")
+        : InStr(sNewString,".old.txt"))
+  sNewString := SubStr(sNewString,1,sExt) "dat"
 
   ;randomly rename old file to not overwrite
   ;If FileExist(sNewString ".old")
