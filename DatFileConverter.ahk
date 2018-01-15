@@ -28,18 +28,21 @@ Global sHeatSigFiles,sSteamLoc,sWorkshopFiles,ScanSteamWorkshop,Editor,sSelected
 lStartGUI:
   ;PID of script...
   iScript_PID := DllCall("GetCurrentProcessId")
+  ;get script filename
+  SplitPath A_ScriptName,,,,sName
+  ;get settings filename
+  sProg_Ini := A_ScriptDir "\" sName ".ini"
 
-  sScriptName := A_ScriptDir "\" SubStr(A_ScriptName,1,-3) "ini"
-  If !FileExist(sScriptName)
+  If !FileExist(sProg_Ini)
     {
     sText := "[Settings]`r`n`r`n;Leave blank to use built-in editor`r`n;R:\SciTe\SciTeStart.exe`r`n;Notepad.exe`r`nEditor=`r`n`r`n;Ask before recycling files`r`nDisableWarnings=0`r`n`r`n;If you have added a bunch of friends to share saves, then it could be a long list`r`nScanSteamWorkshop=1`r`n`r`n;If you don't want it to refresh the view after deleting/converting files`r`nManualRefresh=0`r`n`r`n;Window Position`r`nWinPos=0:0`r`n"
-    FileAppend %sText%,%sScriptName%
+    FileAppend %sText%,%sProg_Ini%
     }
-  IniRead Editor,%sScriptName%,Settings,Editor,%A_Space%
-  IniRead DisableWarnings,%sScriptName%,Settings,DisableWarnings,0
-  IniRead ScanSteamWorkshop,%sScriptName%,Settings,ScanSteamWorkshop,1
-  IniRead ManualRefresh,%sScriptName%,Settings,ManualRefresh,0
-  IniRead sWinPos,%sScriptName%,Settings,WinPos,0:0
+  IniRead Editor,%sProg_Ini%,Settings,Editor,%A_Space%
+  IniRead DisableWarnings,%sProg_Ini%,Settings,DisableWarnings,0
+  IniRead ScanSteamWorkshop,%sProg_Ini%,Settings,ScanSteamWorkshop,1
+  IniRead ManualRefresh,%sProg_Ini%,Settings,ManualRefresh,0
+  IniRead sWinPos,%sProg_Ini%,Settings,WinPos,0:0
   sArray := StrSplit(sWinPos,":")
   iXPos := sArray[1]
   iYPos := sArray[2]
@@ -112,7 +115,7 @@ Return
 
 lButtonRecycleOld:
   StatusBarGetText sCurrentDir,3
-  If (DisableWarnings = True)
+  If DisableWarnings
     FileRecycle %sCurrentDir%\*.dat.old
   Else
     {
@@ -120,7 +123,7 @@ lButtonRecycleOld:
     IfMsgBox OK
       FileRecycle %sCurrentDir%\*.dat.old
     }
-  If (ManualRefresh = False)
+  If !ManualRefresh
     GoSub lButtonRefresh
 Return
 
@@ -129,24 +132,24 @@ lButtonConvert:
   Loop
     {
     iRowNumber := LV_GetNext(iRowNumber)
-    If not iRowNumber
+    If !iRowNumber
       Break
     LV_GetText(sSelectedFile,iRowNumber,3)
     fInputFiles(sSelectedFile)
     }
-  If (ManualRefresh = False)
+  If !ManualRefresh
     GoSub lButtonRefresh
 Return
 
 lCheckboxScanSteam:
   ScanSteamWorkshop := fBoolToggle(ScanSteamWorkshop)
-  IniWrite %ScanSteamWorkshop%,%sScriptName%,Settings,ScanSteamWorkshop
+  IniWrite %ScanSteamWorkshop%,%sProg_Ini%,Settings,ScanSteamWorkshop
   fPopulateTreeView()
 Return
 
 lCheckboxManRefresh:
   ManualRefresh := fBoolToggle(ManualRefresh)
-  IniWrite %ManualRefresh%,%sScriptName%,Settings,ManualRefresh
+  IniWrite %ManualRefresh%,%sProg_Ini%,Settings,ManualRefresh
 Return
 
 lButtonEdit:
@@ -156,7 +159,7 @@ lButtonEdit:
 Return
 
 GuiSize:
-  If A_EventInfo := 1
+  If A_EventInfo = 1
     Return
   GuiControl Move,sMyTreeView, % "H" (A_GuiHeight - 76) "X" (10)
   GuiControl Move,sMyListView, % "H" (A_GuiHeight - 76) "W" (A_GuiWidth - iTreeViewWidth - 40) "X" (iTreeViewWidth + 20)
@@ -175,21 +178,21 @@ lMyListView:
     sFileListB .= A_LoopFileName
 
   ;dbl click to decode/edit or encode
-  If (A_GuiEvent = "DoubleClick")
+  If A_GuiEvent = DoubleClick
     {
-    If (Editor = "")
+    If !Editor
       fEditorGUI(sOutDir "\",sOutNameNoExt,"." sExt)
     Else
       {
       sNewExt := fInputFiles(sClickedFile)
-      If (sNewExt != False)
+      If sNewExt
         fStartEditor(sOutDir "\",sOutNameNoExt,sNewExt)
       }
     }
   ;dbl right click to recycle
-  Else If (A_GuiEvent = "R")
+  Else If A_GuiEvent = R
     {
-    If (DisableWarnings = True)
+    If DisableWarnings
       FileRecycle %sClickedFile%
     Else
       {
@@ -202,13 +205,13 @@ lMyListView:
   Loop Files,%sOutDir%\*.*
     sFileListA .= A_LoopFileName
   ;only refresh list if file added
-  If (sFileListA != sFileListB && ManualRefresh = False)
+  If (sFileListA != sFileListB && !ManualRefresh)
     GoSub lButtonRefresh
 Return
 
 fStartEditor(sDir,sFile,sExt)
   {
-  If (Editor = "")
+  If !Editor
     fEditorGUI(sDir,sFile,sExt)
   Else
     Run %Editor% "%sDir%%sFile%%sExt%"
@@ -217,12 +220,12 @@ fStartEditor(sDir,sFile,sExt)
 GuiEscape:
 GuiClose:
   WinGetPos iXPosT,iYPosT,,,ahk_pid %iScript_PID%
-  If (iXPosT)
+  If iXPosT
     iXPos := iXPosT
-  If (iYPosT)
+  If iYPosT
     iYPos := iYPosT
   sWinPos := iXPos ":" iYPos
-  IniWrite %sWinPos%,%sScriptName%,Settings,WinPos
+  IniWrite %sWinPos%,%sProg_Ini%,Settings,WinPos
 ExitApp
 
 lButtonClose:
@@ -236,7 +239,7 @@ oEditorWinGuiEscape:
   ;get a list of files after
   Loop Files,%sDirEditorGUI%\*.*
     sFileListA .= A_LoopFileName
-  If (sFileListA != sFileListB && ManualRefresh = False)
+  If (sFileListA != sFileListB && !ManualRefresh)
     GoSub lButtonRefresh
   WinActivate
   WinSet Transparent,OFF
@@ -252,10 +255,10 @@ lButtonSaveFileAs:
   Gui Submit,NoHide
   FileSelectFile sSelectedFile,S24,%sButtonSaveFileAs%,Save file as .txt or .dat,txt or dat (*.txt; *.dat)
   ;if user didn't cancel, etc
-  If (sSelectedFile != "")
+  If sSelectedFile
     {
     ;if .dat re-encode
-    If (SubStr(sSelectedFile,-3) = ".dat")
+    If SubStr(sSelectedFile,-3) = .dat
       fSaveEncodeText(sSelectedFile ".txt",sFileEditor)
     ;Else If (SubStr(sSelectedFile,-7) = ".dat.old")
     ;else overwrite old file
@@ -281,7 +284,7 @@ lButtonSaveDatFile:
 Return
 
 oEditorWinGuiSize:
-  If A_EventInfo := 1
+  If A_EventInfo = 1
     Return
   GuiControl Move,sFileEditor, % "H" (A_GuiHeight - 45) "W" (A_GuiWidth - 20)
 Return
@@ -298,29 +301,29 @@ fEditorGUI(sDir,sFile,sExt)
   sDirEditorGUI := sDir
 
   FileRead sInputText,%sDir%%sFile%%sExt%
-  If (sExt = ".dat")
+  If sExt = .dat
     sInputText := fDecodeText(sInputText)
-  Else If (sExt = ".old")
+  Else If sExt = .old
     {
-    If (SubStr(sFile,-3) = ".dat")
+    If SubStr(sFile,-3) = .dat
       sInputText := fDecodeText(sInputText)
     }
 
   Gui oEditorWin:New,+LastFound +Resize +OwnDialogs,Editing %sDir%\%sFile%%sExt%
 
-  If (sExt = ".dat")
+  If sExt = .dat
     sButtonSaveFile := sFile sExt ".txt"
-  Else If (sExt = ".old")
+  Else If sExt = .old
     sButtonSaveFile := sFile sExt ".txt"
   Else
     sButtonSaveFile := sFile sExt
   Gui Add,Button,xm ym glButtonSaveFile vsButtonSaveFile,&Save as %sButtonSaveFile%
 
-  If (SubStr(sFile sExt,-7) = ".dat.txt")
+  If SubStr(sFile sExt,-7) = .dat.txt
     sButtonSaveDatFile := sFile
-  Else If (sExt = ".old")
+  Else If sExt = .old
     sButtonSaveDatFile := sFile sExt ".dat"
-  Else If (sExt = ".txt")
+  Else If sExt = .txt
     sButtonSaveDatFile := sFile sExt ".dat"
   Else
     sButtonSaveDatFile := sFile sExt
@@ -340,7 +343,7 @@ fEditorGUI(sDir,sFile,sExt)
 
 fBoolToggle(bBool)
   {
-  If (bBool = 1)
+  If bBool
     bBool := 0
   Else
     bBool := 1
@@ -352,21 +355,21 @@ fPopulateTreeView(sSelectedItem = 0)
   TV_Delete()
   GuiControl -Redraw,sMyTreeView
   SplashTextOn 200,25,%A_ScriptName%,Loading...
-  fAddSubFoldersToTree(sHeatSigFiles,,True)
-  If (ScanSteamWorkshop = True)
+  fAddSubFoldersToTree(sHeatSigFiles,,1)
+  If ScanSteamWorkshop
     {
     Loop Parse,sWorkshopFiles,`n,`r
       fAddSubFoldersToTree(A_LoopField)
     }
   SplashTextOff
   GuiControl +Redraw,sMyTreeView
-  If (sSelectedItem != 0)
+  If sSelectedItem
     {
     iItemID := 0
     Loop
       {
       iItemID := TV_GetNext(iItemID,"Full")
-      If not iItemID
+      If !iItemID
         Break
       TV_GetText(sItemText,iItemID)
       TV_GetText(sParentText,TV_GetParent(iItemID))
@@ -383,12 +386,12 @@ fPopulateTreeView(sSelectedItem = 0)
     }
   }
 
-fAddSubFoldersToTree(sFolder,iParentItemID = 0,bHSFiles = False)
+fAddSubFoldersToTree(sFolder,iParentItemID := 0,bHSFiles := 0)
   {
   Loop Files,%sFolder%\*.*,D
     {
-    If (bHSFiles = True)
-      fAddSubFoldersToTree(A_LoopFileFullPath,TV_Add(A_LoopFileName,iParentItemID,"Icon1"),True)
+    If bHSFiles
+      fAddSubFoldersToTree(A_LoopFileFullPath,TV_Add(A_LoopFileName,iParentItemID,"Icon1"),1)
     Else ;use steam icon for workshop files (be nice to have a LV_geticon)
       fAddSubFoldersToTree(A_LoopFileFullPath,TV_Add(A_LoopFileName,iParentItemID,"Bold Icon2"))
     }
@@ -401,13 +404,13 @@ fSelectTreeItem()
   Loop
     {
     iParentID := TV_GetParent(iParentID)
-    If not iParentID
+    If !iParentID
       Break
     TV_GetText(sParentText, iParentID)
     sSelectedItemText := sParentText "\" sSelectedItemText
     }
     ;bold is a steam workshop folder
-    If (TV_Get(TV_GetSelection(),"Bold") = 0)
+    If !TV_Get(TV_GetSelection(),"Bold")
       sSelectedFullPath := sHeatSigFiles "\" sSelectedItemText
     Else
       {
@@ -421,7 +424,7 @@ fSelectTreeItem()
           sSelectedFullPath := sDirPath
         }
       }
-  If (sSelectedItemText != "")
+  If sSelectedItemText
     sSelectedTreeText := sSelectedItemText
   Return sSelectedFullPath
   }
@@ -469,7 +472,7 @@ fGetSteamLibraryPaths()
     ;remove extra text, so it's just the paths
     Loop Parse,sLibraryFileTemp,`n,`r%A_Space%%A_Tab%
       {
-      If (A_Index < 3 || A_LoopField = "")
+      If (A_Index < 3 || !A_LoopField)
         Continue
       Regex = i)^"([1-9]|[1-9][0-9]|[1-9][0-9][0-9])"[ \t]+"
       sLoopTemp := RegExReplace(A_LoopField,Regex)
@@ -526,7 +529,7 @@ fDecodeText(sText)
   Loop Parse,sText,`n,`r
     {
     ;ignore the lines that don't need to be decoded
-    If (fCheckText(A_LoopField,A_Index) = True)
+    If fCheckText(A_LoopField,A_Index)
       {
       sOutFile .= A_LoopField "`r`n"
       Continue
@@ -545,7 +548,7 @@ fSaveDecodeText(sInputFile,sSaveGame)
   FileDelete %sInputFile%.txt
   FileAppend %sOutFile%,%sInputFile%.txt
   ;for editing newly created file
-  If (SubStr(sInputFile,-7) = ".dat.old")
+  If SubStr(sInputFile,-7) = .dat.old
     Return ".old.txt"
   Else
     Return ".dat.txt"
@@ -556,7 +559,7 @@ fEncodeText(sText)
   sOutFile := ""
   Loop Parse,sText,`n,`r
     {
-    If (fCheckText(A_LoopField,A_Index) = True)
+    If fCheckText(A_LoopField,A_Index)
       {
       sOutFile .= A_LoopField "`r`n"
       Continue
@@ -572,7 +575,7 @@ fSaveEncodeText(sInputFile,sSaveGame)
   sOutFile := fEncodeText(sSaveGame)
   ;get filename for rename/replace
   sNewString := sInputFile
-  If (InStr(sNewString,".dat.txt") > 0)
+  If InStr(sNewString,".dat.txt") > 0
     sExt := InStr(sNewString,".dat.txt")
   Else
     sExt := InStr(sNewString,".old.txt")
@@ -591,11 +594,11 @@ fSaveEncodeText(sInputFile,sSaveGame)
 ;ignore the lines that don't need to be decoded
 fCheckText(sText,iIndex)
   {
-  If (iIndex > 4)
-    Return False
+  If iIndex > 4
+    Return 0
   Else If (sText = "<Header>" || sText = "" || InStr(sText,"TimeNumber = ") > 0
       || InStr(sText,"Encoded = 1") > 0 || RegExMatch(sText,"^Time\s=\s") > 0)
-    Return True
+    Return 1
   }
 
 ;remove blank lines from end of var
@@ -603,7 +606,7 @@ fRemoveBlank(sText)
   {
   Loop
     {
-    If (SubStr(sText,-1) = "`r`n")
+    If SubStr(sText,-1) = "`r`n"
       sText := SubStr(sText,1,-2)
     Else
       Break
@@ -614,24 +617,26 @@ fRemoveBlank(sText)
 ;https://github.com/ahkscript/libcrypt.ahk
 fBase64_DecodeText(sText)
   {
-	DllCall("Crypt32.dll\CryptStringToBinary", "Ptr", &sText, "UInt", StrLen(In)
-	, "UInt", 0x1, "Ptr", 0, "UInt*", OutLen, "Ptr", 0, "Ptr", 0)
+  sPtr := (A_PtrSize ? "Ptr" : "UInt")
+	DllCall("Crypt32.dll\CryptStringToBinary", sPtr, &sText, "UInt", StrLen(In)
+	, "UInt", 0x1, sPtr, 0, "UInt*", OutLen, sPtr, 0, sPtr, 0)
 	VarSetCapacity(Out, OutLen)
 
-	DllCall("Crypt32.dll\CryptStringToBinary", "Ptr", &sText, "UInt", StrLen(In)
-	, "UInt", 0x1, "Str", Out, "UInt*", OutLen, "Ptr", 0, "Ptr", 0)
+	DllCall("Crypt32.dll\CryptStringToBinary", sPtr, &sText, "UInt", StrLen(In)
+	, "UInt", 0x1, "Str", Out, "UInt*", OutLen, sPtr, 0, sPtr, 0)
 
 	Return StrGet(&Out, OutLen, "UTF-8")
   }
 
 fBase64_EncodeText(sText)
   {
+  sPtr := (A_PtrSize ? "Ptr" : "UInt")
 	VarSetCapacity(Bin, StrPut(sText, "UTF-8"))
-	DllCall("Crypt32.dll\CryptBinaryToString", "Ptr", &Bin
-	, "UInt", StrPut(sText, &Bin, "UTF-8")-1, "UInt", 0x40000001, "Ptr", 0, "UInt*", PcchString)
+	DllCall("Crypt32.dll\CryptBinaryToString", sPtr, &Bin
+	, "UInt", StrPut(sText, &Bin, "UTF-8")-1, "UInt", 0x40000001, sPtr, 0, "UInt*", PcchString)
 
 	VarSetCapacity(Out, PcchString * (1+A_IsUnicode))
-	DllCall("Crypt32.dll\CryptBinaryToString", "Ptr", &Bin
+	DllCall("Crypt32.dll\CryptBinaryToString", sPtr, &Bin
 	, "UInt", StrPut(sText, &Bin, "UTF-8")-1, "UInt", 0x40000001, "Str", Out, "UInt*", PcchString)
 
 	Return Out
