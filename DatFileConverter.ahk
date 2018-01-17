@@ -1,7 +1,6 @@
 #NoEnv
 #KeyHistory 0
 #NoTrayIcon
-;#SingleInstance Force
 #SingleInstance Off
 SetBatchLines -1
 ListLines Off
@@ -10,9 +9,24 @@ Process Priority,,A
 
 Global sPtr := (A_PtrSize ? "Ptr" : "UInt"),crypt32 := LoadLibrary("crypt32")
 
+;PID of script...
+iScript_PID := DllCall("GetCurrentProcessId")
+;get script filename
+SplitPath A_ScriptName,,,,sName
+;get settings filename
+sProg_Ini := A_ScriptDir "\" sName ".ini"
+
 ;no files dropped on exe so we open GUI
 If !A_Args.Length()
+  {
+  IniRead iRunning,%sProg_Ini%,Settings,Running,0
+  If iRunning
+    {
+    WinActivate ahk_pid %iRunning%
+    ExitApp
+    }
   GoSub lStartGUI
+  }
 Else ;loop through input file(s)
   {
   For iIndex,sInputFile in A_Args
@@ -28,18 +42,12 @@ Return
 Global sHeatSigFiles,sSteamLoc,sWorkshopFiles,ScanSteamWorkshop,Editor,sSelectedTreeText
 
 lStartGUI:
-  ;PID of script...
-  iScript_PID := DllCall("GetCurrentProcessId")
-  ;get script filename
-  SplitPath A_ScriptName,,,,sName
-  ;get settings filename
-  sProg_Ini := A_ScriptDir "\" sName ".ini"
-
   If !FileExist(sProg_Ini)
     {
-    sText := "[Settings]`r`n`r`n;Leave blank to use built-in editor`r`n;R:\SciTe\SciTeStart.exe`r`n;Notepad.exe`r`nEditor=`r`n`r`n;Ask before recycling files`r`nDisableWarnings=0`r`n`r`n;If you have added a bunch of friends to share saves, then it could be a long list`r`nScanSteamWorkshop=1`r`n`r`n;If you don't want it to refresh the view after deleting/converting files`r`nManualRefresh=0`r`n`r`n;Window Position`r`nWinPos=0:0`r`n"
+    sText := "[Settings]`r`n`r`n;Leave blank to use built-in editor`r`n;R:\SciTe\SciTeStart.exe`r`n;Notepad.exe`r`nEditor=`r`n`r`n;Ask before recycling files`r`nDisableWarnings=0`r`n`r`n;If you have added a bunch of friends to share saves, then it could be a long list`r`nScanSteamWorkshop=1`r`n`r`n;If you don't want it to refresh the view after deleting/converting files`r`nManualRefresh=0`r`n`r`n;Program running?`r`nRunning=0`r`n;Window position`r`nWinPos=0:0`r`n`r`n"
     FileAppend %sText%,%sProg_Ini%
     }
+  IniWrite %iScript_PID%,%sProg_Ini%,Settings,Running
   IniRead Editor,%sProg_Ini%,Settings,Editor,%A_Space%
   IniRead DisableWarnings,%sProg_Ini%,Settings,DisableWarnings,0
   IniRead ScanSteamWorkshop,%sProg_Ini%,Settings,ScanSteamWorkshop,1
@@ -97,7 +105,7 @@ lStartGUI:
   sTreeItem := fSelectTreeItem()
   fPopulateListView(sTreeItem)
 
-  Gui Show,w570 x%iXPos% y%iYPos%,%sHeatSigFiles%
+  Gui Show,w570 x%iXPos% y%iYPos%,%sName%: %sHeatSigFiles%
   ;for tooltips
   OnMessage(0x200,"WM_MOUSEMOVE")
 Return
@@ -227,6 +235,7 @@ GuiClose:
     iYPos := iYPosT
   sWinPos := iXPos ":" iYPos
   IniWrite %sWinPos%,%sProg_Ini%,Settings,WinPos
+  IniWrite 0,%sProg_Ini%,Settings,Running
 ExitApp
 
 lButtonClose:
