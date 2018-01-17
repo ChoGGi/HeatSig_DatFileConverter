@@ -1,8 +1,8 @@
 #NoEnv
 #KeyHistory 0
 #NoTrayIcon
-#SingleInstance Force
-;#SingleInstance Off
+;#SingleInstance Force
+#SingleInstance Off
 SetBatchLines -1
 ListLines Off
 AutoTrim Off
