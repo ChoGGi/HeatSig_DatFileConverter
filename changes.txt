@@ -1,5 +1,7 @@
-v0.1.0
+v0.1.1
 ...
+v0.1.0
+problems with multiple copies running
 v0.0.9
 Saves window position
 Creates ini if none exists

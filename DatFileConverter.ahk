@@ -16,18 +16,8 @@ SplitPath A_ScriptName,,,,sName
 ;get settings filename
 sProg_Ini := A_ScriptDir "\" sName ".ini"
 
-;no files dropped on exe so we open GUI
-If !A_Args.Length()
-  {
-  IniRead iRunning,%sProg_Ini%,Settings,Running,0
-  If iRunning
-    {
-    WinActivate ahk_pid %iRunning%
-    ExitApp
-    }
-  GoSub lStartGUI
-  }
-Else ;loop through input file(s)
+;loop through input file(s)
+If A_Args[1]
   {
   For iIndex,sInputFile in A_Args
     {
@@ -36,7 +26,21 @@ Else ;loop through input file(s)
     }
   ExitApp
   }
+;no files dropped on exe so we open GUI
+Else
+  {
+  ;we just need the one copy running so check for pid
+  IniRead iRunning,%sProg_Ini%,Settings,Running,0
+  If iRunning
+    {
+    WinActivate ahk_pid %iRunning%
+    ExitApp
+    }
+  OnExit GuiClose
+  GoSub lStartGUI
+  }
 
+;end of init section
 Return
 
 Global sHeatSigFiles,sSteamLoc,sWorkshopFiles,ScanSteamWorkshop,Editor,sSelectedTreeText
@@ -53,6 +57,8 @@ lStartGUI:
   IniRead ScanSteamWorkshop,%sProg_Ini%,Settings,ScanSteamWorkshop,1
   IniRead ManualRefresh,%sProg_Ini%,Settings,ManualRefresh,0
   IniRead sWinPos,%sProg_Ini%,Settings,WinPos,0:0
+  If sWinPos = :
+    sWinPos := "0:0"
   sArray := StrSplit(sWinPos,":")
   iXPos := sArray[1]
   iYPos := sArray[2]
@@ -234,7 +240,8 @@ GuiClose:
   If iYPosT
     iYPos := iYPosT
   sWinPos := iXPos ":" iYPos
-  IniWrite %sWinPos%,%sProg_Ini%,Settings,WinPos
+  If sWinPos != :
+    IniWrite %sWinPos%,%sProg_Ini%,Settings,WinPos
   IniWrite 0,%sProg_Ini%,Settings,Running
 ExitApp
 
