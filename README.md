@@ -5,7 +5,7 @@ https://store.steampowered.com/app/268130/
 
 
 ### No warranty implied or otherwise!
-##### Tested on version 2017.11.30.1
+##### Tested on version 2018.2.13.1
 ```
 If Heat Signature changes around how the files are saved you could lose your files, so always backup before doing anything.
 I tried to make it safe, but you get what you pay for.

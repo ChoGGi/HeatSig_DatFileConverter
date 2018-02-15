@@ -7,6 +7,7 @@ ListLines Off
 AutoTrim Off
 Process Priority,,A
 
+;needed for encode/decode base64
 Global sPtr := (A_PtrSize ? "Ptr" : "UInt"),crypt32 := LoadLibrary("crypt32")
 
 ;PID of script...
@@ -113,19 +114,21 @@ lStartGUI:
 
   Gui Show,w570 x%iXPos% y%iYPos%,%sName%: %sHeatSigFiles%
   ;for tooltips
-  OnMessage(0x200,"WM_MOUSEMOVE")
+  OnMessage(0x200,"fWM_MOUSEMOVE")
 Return
 
 lMyTreeView:
   sTreeItem := fSelectTreeItem()
   fPopulateListView(sTreeItem)
+
+  WinSetTitle % sName ": " sTreeItem
 Return
 
 lButtonRefresh:
   sTreeItem := fSelectTreeItem()
   fPopulateTreeView(sTreeItem)
-  Sleep 100
-  fPopulateListView(sTreeItem)
+  ;Sleep 100
+  ;fPopulateListView(sTreeItem)
 Return
 
 lButtonRecycleOld:
@@ -346,7 +349,6 @@ fEditorGUI(sDir,sFile,sExt)
   Gui Show,,Editing %sDir%\%sFile%%sExt%
   ;focus on edit box
   GuiControl Focus,oFileEditor
-  ;OnMessage(0x200, "WM_MOUSEMOVE")
   }
 
 fBoolToggle(bBool)
@@ -382,7 +384,8 @@ fPopulateTreeView(sSelectedItem = 0)
     iParentID := TV_GetParent(iItemID)
     TV_GetText(sGrandParentText,TV_GetParent(iParentID))
     ;found what we're looking for
-    If (sParentText "\" sItemText = sSelectedTreeText
+    If (sItemText = sSelectedTreeText
+        || sParentText "\" sItemText = sSelectedTreeText
         || sGrandParentText "\" sParentText "\" sItemText = sSelectedTreeText)
       {
       TV_Modify(iItemID)
@@ -412,10 +415,9 @@ fSelectTreeItem()
     TV_GetText(sParentText, iParentID)
     sSelectedItemText := sParentText "\" sSelectedItemText
     }
+
     ;bold is a steam workshop folder
-    If !TV_Get(TV_GetSelection(),"Bold")
-      sSelectedFullPath := sHeatSigFiles "\" sSelectedItemText
-    Else
+    If TV_Get(TV_GetSelection(),"Bold")
       {
       ;loop through workshop folders till it matches
       ;if user has manually moved game to another steam library
@@ -427,6 +429,9 @@ fSelectTreeItem()
           sSelectedFullPath := sDirPath
         }
       }
+    Else
+      sSelectedFullPath := sHeatSigFiles "\" sSelectedItemText
+
   If sSelectedItemText
     sSelectedTreeText := sSelectedItemText
   Return sSelectedFullPath
@@ -441,15 +446,15 @@ fPopulateListView(sSelectedFullPath)
 
   Loop Files,%sSelectedFullPath%\*.*,F
     {
-    sChkNameD := SubStr(A_LoopFileLongPath	,-7)
-    sChkNameE := SubStr(A_LoopFileLongPath	,-3)
-    If (sChkNameD = ".dat.txt" || sChkNameE = ".dat"
-        || sChkNameD = ".dat.old" || sChkNameD = ".old.txt")
-      {
+    ;sChkNameD := SubStr(A_LoopFileLongPath	,-7)
+    ;sChkNameE := SubStr(A_LoopFileLongPath	,-3)
+    ;If (sChkNameE = ".txt" || sChkNameD = ".dat.txt" || sChkNameE = ".dat"
+    ;    || sChkNameD = ".dat.old" || sChkNameD = ".old.txt")
+    ;  {
       LV_Add("",A_LoopFileName,A_LoopFileTimeModified,A_LoopFileLongPath,A_LoopFileDir)
       iFileCount += 1
       iTotalSize += A_LoopFileSize
-      }
+    ;  }
     }
   GuiControl +Redraw,oListView1
 
@@ -644,7 +649,7 @@ fBase64_EncodeText(sText)
 
 ;from ahk manual
 ;GUI Example: Display context-senstive help (via ToolTip)
-WM_MOUSEMOVE()
+fWM_MOUSEMOVE()
   {
   Static CurrControl,PrevControl,_TT
   CurrControl := A_GuiControl
@@ -659,7 +664,7 @@ WM_MOUSEMOVE()
   DisplayToolTip:
     SetTimer DisplayToolTip,Off
     ToolTip % %CurrControl%_TT
-    SetTimer RemoveToolTip,50000 ;don't like tooltips that disappear quickly...
+    SetTimer RemoveToolTip,5000 ;don't like tooltips that disappear quickly...
   Return
 
   RemoveToolTip:

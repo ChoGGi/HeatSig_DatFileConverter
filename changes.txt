@@ -1,7 +1,14 @@
-v0.1.1
+v0.1.2
 ...
+v0.1.1
+
+
+Problem keeping treeview position sometimes
+Stopped the file view from filtering certain files
+Update title on folder changed
+
 v0.1.0
-problems with multiple copies running
+Problem with multiple copies running
 v0.0.9
 Saves window position
 Creates ini if none exists
