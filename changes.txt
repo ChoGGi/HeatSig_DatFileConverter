@@ -2,10 +2,10 @@ v0.1.2
 ...
 v0.1.1
 
-
-Problem keeping treeview position sometimes
+Problem keeping treeview position on certain folders
 Stopped the file view from filtering certain files
-Update title on folder changed
+Added icons to distinguish types of files (txt/dat/other)
+Switches focus to files after selecting folder
 
 v0.1.0
 Problem with multiple copies running

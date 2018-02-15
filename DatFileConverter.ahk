@@ -69,27 +69,33 @@ lStartGUI:
   If iXPos > %A_ScreenWidth%
     iXPos := A_ScreenWidth // 3
 
+
   ;Shamelessly borrowed/edited from Autohotkey help (tree/listview example)
   sHeatSigFiles := A_APPDATA "\Heat_Signature"
   sWorkshopFiles := fGetSteamLibraryPaths()
 
   iTreeViewWidth := 175
-  ;iListViewWidth := 400 - iTreeViewWidth - 20
 
+  ;TreeView icons
+  oTVImageListID := IL_Create(2)
+  IL_Add(oTVImageListID,A_WinDir "\system32\shell32.dll",-4)
+  IL_Add(oTVImageListID,sSteamLoc "\Steam.exe",0)
   Gui +LastFound +Resize +OwnDialogs
-
-  oImageListID := IL_Create(2)
-  IL_Add(oImageListID,"shell32.dll",4)
-  IL_Add(oImageListID,sSteamLoc "\Steam.exe",0)
-
   Gui Add,Button,glButtonRefresh voButtonRefresh,&Refresh List
   Gui Add,Button,x+m glButtonEdit vosButtonEdit,&Edit Selected
   Gui Add,Button,x+m glButtonConvert voButtonConvert,&Convert Selected
   Gui Add,Button,x+m glButtonRecycleOld voButtonRecycleOld,&Recycle .old
   Gui Add,Checkbox,x+m ym5 Checked%ScanSteamWorkshop% glCheckboxScanSteam voCheckboxScanSteam,&Scan Workshop
   Gui Add,Checkbox,x+m Checked%ManualRefresh% glCheckboxManRefresh voCheckboxManRefresh,&Manual Refresh
-  Gui Add,TreeView,y+15 r20 glMyTreeView voTreeView1 ImageList%oImageListID% w%iTreeViewWidth%
-  Gui Add,ListView,x+m r20 glMyListView voListView1 w20,Name|Modified|File
+  Gui Add,TreeView,y+15 r20 glMyTreeView voTreeView1 ImageList%oTVImageListID% w%iTreeViewWidth%
+  Gui Add,ListView,x+m r20 glMyListView voListView1,|Name|Modified|File
+  ;ListView icons
+  oLVImageList := IL_Create(3)
+  LV_SetImageList(oLVImageList)
+  IL_Add(oLVImageList,A_ScriptDir "\" sName ".exe",0)
+  IL_Add(oLVImageList,A_WinDir "\system32\shell32.dll",-3)
+  IL_Add(oLVImageList,A_WinDir "\system32\shell32.dll",-152)
+
   ;toolips for elements
   oButtonRefresh_TT := "Refreshes view"
   osButtonEdit_TT := "Edits first selected file"
@@ -99,11 +105,11 @@ lStartGUI:
   oCheckboxManRefresh_TT := "Only refresh file list when you click Refresh List"
   oListView1_TT := "Double click to Edit or Decode/Encode`nDouble right-click to Recycle."
 
-  iCol2Width := 105
-  ;LV_ModifyCol(1, iListViewWidth - iCol2Width + 120)
-  LV_ModifyCol(1, iCol2Width + 120)
-  LV_ModifyCol(2, iCol2Width)
-  LV_ModifyCol(3, 0)
+  iCol2Width := 115
+  LV_ModifyCol(1,"AutoHdr")
+  LV_ModifyCol(2,iCol2Width + 120)
+  LV_ModifyCol(3,iCol2Width)
+  LV_ModifyCol(4,0)
 
   Gui Add,StatusBar,vsStatusbar
   SB_SetParts(60,85)
@@ -112,7 +118,7 @@ lStartGUI:
   sTreeItem := fSelectTreeItem()
   fPopulateListView(sTreeItem)
 
-  Gui Show,w570 x%iXPos% y%iYPos%,%sName%: %sHeatSigFiles%
+  Gui Show,w615 x%iXPos% y%iYPos%,%sName%
   ;for tooltips
   OnMessage(0x200,"fWM_MOUSEMOVE")
 Return
@@ -120,15 +126,16 @@ Return
 lMyTreeView:
   sTreeItem := fSelectTreeItem()
   fPopulateListView(sTreeItem)
-
-  WinSetTitle % sName ": " sTreeItem
+  Sleep 150
+  GuiControl Focus,oListView1
+  LV_Modify(1,"Select")
 Return
 
 lButtonRefresh:
   sTreeItem := fSelectTreeItem()
   fPopulateTreeView(sTreeItem)
-  ;Sleep 100
-  ;fPopulateListView(sTreeItem)
+  ;Sleep 50
+  fPopulateListView(sTreeItem)
 Return
 
 lButtonRecycleOld:
@@ -152,7 +159,7 @@ lButtonConvert:
     iRowNumber := LV_GetNext(iRowNumber)
     If !iRowNumber
       Break
-    LV_GetText(sSelectedFile,iRowNumber,3)
+    LV_GetText(sSelectedFile,iRowNumber,4)
     fInputFiles(sSelectedFile)
     }
   If !ManualRefresh
@@ -171,7 +178,7 @@ lCheckboxManRefresh:
 Return
 
 lButtonEdit:
-  LV_GetText(sSelectedFile,LV_GetNext(),3)
+  LV_GetText(sSelectedFile,LV_GetNext(),4)
   SplitPath sSelectedFile,,sOutDir,sExt,sOutNameNoExt
   fStartEditor(sOutDir "\",sOutNameNoExt,"." sExt)
 Return
@@ -188,7 +195,7 @@ lMyListView:
   If (A_EventInfo < 1 || A_GuiEvent != "DoubleClick" && A_GuiEvent != "R")
     Return
 
-  LV_GetText(sClickedFile,A_EventInfo,3)
+  LV_GetText(sClickedFile,A_EventInfo,4)
   SplitPath sClickedFile,sOutFileName,sOutDir,sExt,sOutNameNoExt
 
   ;get a list of files beforehand
@@ -446,15 +453,17 @@ fPopulateListView(sSelectedFullPath)
 
   Loop Files,%sSelectedFullPath%\*.*,F
     {
-    ;sChkNameD := SubStr(A_LoopFileLongPath	,-7)
-    ;sChkNameE := SubStr(A_LoopFileLongPath	,-3)
-    ;If (sChkNameE = ".txt" || sChkNameD = ".dat.txt" || sChkNameE = ".dat"
-    ;    || sChkNameD = ".dat.old" || sChkNameD = ".old.txt")
-    ;  {
-      LV_Add("",A_LoopFileName,A_LoopFileTimeModified,A_LoopFileLongPath,A_LoopFileDir)
-      iFileCount += 1
-      iTotalSize += A_LoopFileSize
-    ;  }
+    ;sChkNameD := SubStr(A_LoopFileLongPath,-7)
+    sChkNameE := SubStr(A_LoopFileLongPath,-3)
+    FormatTime,sTimeTmp,%A_LoopFileTimeModified%,yyyy-MM-dd HH:mm:ss
+    If sChkNameE = .txt
+      LV_Add("Icon" . 3,"",A_LoopFileName,sTimeTmp,A_LoopFileLongPath)
+    Else If (sChkNameE = ".dat" || sChkNameE = ".old")
+      LV_Add("Icon" . 1,"",A_LoopFileName,sTimeTmp,A_LoopFileLongPath)
+    Else
+      LV_Add("Icon" . 2,"",A_LoopFileName,sTimeTmp,A_LoopFileLongPath)
+    iFileCount += 1
+    iTotalSize += A_LoopFileSize
     }
   GuiControl +Redraw,oListView1
 
