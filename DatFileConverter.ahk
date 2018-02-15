@@ -167,13 +167,13 @@ lButtonConvert:
 Return
 
 lCheckboxScanSteam:
-  ScanSteamWorkshop := fBoolToggle(ScanSteamWorkshop)
+  ScanSteamWorkshop := (ScanSteamWorkshop ? 0 : 1)
   IniWrite %ScanSteamWorkshop%,%sProg_Ini%,Settings,ScanSteamWorkshop
   fPopulateTreeView()
 Return
 
 lCheckboxManRefresh:
-  ManualRefresh := fBoolToggle(ManualRefresh)
+  ManualRefresh := (ManualRefresh ? 0 : 1)
   IniWrite %ManualRefresh%,%sProg_Ini%,Settings,ManualRefresh
 Return
 
@@ -356,13 +356,6 @@ fEditorGUI(sDir,sFile,sExt)
   Gui Show,,Editing %sDir%\%sFile%%sExt%
   ;focus on edit box
   GuiControl Focus,oFileEditor
-  }
-
-fBoolToggle(bBool)
-  {
-  If bBool
-    Return 0
-  Return 1
   }
 
 fPopulateTreeView(sSelectedItem = 0)

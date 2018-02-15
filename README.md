@@ -1,11 +1,8 @@
 ### Save file convertor for the game [Heat Signature](http://www.heatsig.com)
-It's a fun little top down space based hijacking game, you should buy a copy
-
-https://store.steampowered.com/app/268130/
-
+It's a fun little top down space based hijacking game, you should buy a copy: https://store.steampowered.com/app/268130/
 
 ### No warranty implied or otherwise!
-##### Tested on version 2018.2.13.1
+##### Last tested on version 2018.2.13.1
 ```
 If Heat Signature changes around how the files are saved you could lose your files, so always backup before doing anything.
 I tried to make it safe, but you get what you pay for.
@@ -15,8 +12,8 @@ be wary using it if there's any update notes mentioning changes to saves
 ```
 Start DatFileConverter.exe
 Double click a file to open it in the editor
-You can double right-click in the list to send a file to the recycle bin.
-You can also drop files on DatFileConverter.exe to convert without opening the GUI.
+You can double right-click to send a file to the recycle bin.
+You can also drop files on DatFileConverter.exe to convert without opening the GUI (see below).
 ```
 ### DatFileConverter.ini:
 ```
@@ -33,13 +30,12 @@ Retired items/Captured characters are in "Workshop" folder
 ```
 ### Misc:
 ```
-You can also drag and drop dat/txt files on the exe to convert without GUI
-*  Drop save.dat on exe
+You can drag and drop dat/txt files on the exe to convert without GUI
+*  Drop save.dat on DatFileConverter.exe
 *  Edit save.dat.txt file
-*  Drop save.dat.txt file on exe
+*  Drop save.dat.txt file on DatFileConverter.exe
 *  Start game
 You can drop both dat and txt files at the same time.
-
 
 Uses base64 code from https://github.com/ahkscript/libcrypt.ahk
 ```
