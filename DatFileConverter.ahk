@@ -649,6 +649,7 @@ fWM_MOUSEMOVE()
 ;https://github.com/ahkscript/libcrypt.ahk
 fBase64_DecodeText(sText)
   {
+  Static sPtr := (A_PtrSize ? "Ptr" : "UInt")
 	DllCall(crypt32.CryptStringToBinary, sPtr, &sText, "UInt", 0
 	, "UInt", 0x1, sPtr, 0, "UInt*", OutLen, sPtr, 0, sPtr, 0)
 	VarSetCapacity(Out, OutLen)
@@ -661,6 +662,7 @@ fBase64_DecodeText(sText)
 
 fBase64_EncodeText(sText)
   {
+  Static sPtr := (A_PtrSize ? "Ptr" : "UInt")
 	VarSetCapacity(Bin, StrPut(sText, "UTF-8"))
 	DllCall(crypt32.CryptBinaryToString, sPtr, &Bin
 	, "UInt", StrPut(sText, &Bin, "UTF-8")-1
@@ -682,11 +684,15 @@ https://github.com/ahkscript/ASPDM/blob/master/Local-Client/Test_Packages/loadli
 LoadLibrary(sDllName)
   {
   Static ref := {}
+        ,sPtr := (A_PtrSize ? "Ptr" : "UInt")
+        ,sUPtr := (A_PtrSize ? "UPtr" : "UInt")
+        ,sUPtrP := (A_PtrSize ? "UPtr*" : "UInt*")
+        ,sPtrP := (A_PtrSize ? "Ptr*" : "Int*")
+        ,Ptr := (A_PtrSize ? Ptr : UInt)
         ,iPtrSize92 := (A_PtrSize=4) ? 92 : 108
         ,iPtrSize96 := (A_PtrSize=4) ? 96 : 112
         ,iPtrSize100 := (A_PtrSize=4) ? 100 : 116
         ,sIsUni := (A_IsUnicode) ? "W" : "A"
-        ,sPtr := (A_PtrSize ? "Ptr" : "UInt")
   If (!(ptr := p := DllCall("LoadLibrary","Str",sDllName,sPtr)))
     Return 0
   ref[ptr,"count"] := (ref[ptr]) ? ref[ptr,"count"]+1 : 1
