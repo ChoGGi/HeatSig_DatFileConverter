@@ -1,7 +1,6 @@
 v0.1.2
 ...
 v0.1.1
-
 Problem keeping treeview position on certain folders
 Stopped the file view from filtering certain files
 Added icons to distinguish types of files (txt/dat/other)
@@ -9,12 +8,15 @@ Switches focus to files after selecting folder
 
 v0.1.0
 Problem with multiple copies running
+
 v0.0.9
 Saves window position
 Creates ini if none exists
 Refresh will now also refresh file tree
+
 v0.0.8
 Save As was appending rather than overwriting .txt/.old
+
 v0.0.7
 Made how it converts files more future proof
 Made it a bit more lenient with file names
@@ -22,18 +24,23 @@ Added a convert button (select multiple files with ctrl-click or shift-click)
 Added a recycle .dat.old button
 Added checkboxes to toggle scanning workshop files/manual refresh
 Added a built-in editor
+
 v0.0.6
 Wasn't closing after drag and drop
 Added option to ini to choose whether to load Steam Workshop saves
+
 v0.0.5
 Now checks in Steam workshop folder for Retired items/Captured characters
 Added a button to re-edit already converted files
+
 v0.0.4
 Added a GUI ;)
 See DatFileConverter.ini for some basic options
+
 v0.0.3
 Combined Encode/Decode into DatFileConverter
 Shows file select dialog if you open it without dropping a file on it
+
 v0.0.2
 Made the exes 32bit
 Added a message if you open it without dropping a file on it

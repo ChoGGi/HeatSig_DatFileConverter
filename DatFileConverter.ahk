@@ -8,7 +8,7 @@ AutoTrim Off
 Process Priority,,A
 
 ;needed for encode/decode base64
-Global sPtr := (A_PtrSize ? "Ptr" : "UInt"),crypt32 := LoadLibrary("crypt32")
+Global crypt32 := LoadLibrary("crypt32")
 
 ;PID of script...
 iScript_PID := DllCall("GetCurrentProcessId")
@@ -65,9 +65,9 @@ lStartGUI:
   iYPos := sArray[2]
   ;keep GUI on screen
   If iYPos > %A_ScreenHeight%
-    iYPos := A_ScreenHeight // 3
+    iYPos := 0
   If iXPos > %A_ScreenWidth%
-    iXPos := A_ScreenWidth // 3
+    iXPos := 0
 
 
   ;Shamelessly borrowed/edited from Autohotkey help (tree/listview example)
@@ -244,11 +244,7 @@ fStartEditor(sDir,sFile,sExt)
 
 GuiEscape:
 GuiClose:
-  WinGetPos iXPosT,iYPosT
-  If iXPosT
-    iXPos := iXPosT
-  If iYPosT
-    iYPos := iYPosT
+  WinGetPos iXPos,iYPos
   sWinPos := iXPos ":" iYPos
   If sWinPos != :
     IniWrite %sWinPos%,%sProg_Ini%,Settings,WinPos
@@ -621,6 +617,35 @@ fRemoveBlank(sText)
   Return sText
   }
 
+fWM_MOUSEMOVE()
+  {
+  Static sPrevControl,_TT
+
+  ;remove tooltip if mouse not over gui
+  If !A_Gui
+    {
+    Tooltip
+    Return
+    }
+
+  ;same control or blank control
+  If (A_GuiControl = sPrevControl || A_GuiControl = A_Space)
+    Return
+
+  SetTimer DisplayToolTip,-500
+  sPrevControl := A_GuiControl
+  Return
+
+  DisplayToolTip:
+    ToolTip % %sPrevControl%_TT
+    SetTimer RemoveToolTip,-10000
+  Return
+
+  RemoveToolTip:
+    ToolTip
+  Return
+  }
+
 ;https://github.com/ahkscript/libcrypt.ahk
 fBase64_DecodeText(sText)
   {
@@ -649,32 +674,6 @@ fBase64_EncodeText(sText)
 	Return Out
   }
 
-;from ahk manual
-;GUI Example: Display context-senstive help (via ToolTip)
-fWM_MOUSEMOVE()
-  {
-  Static CurrControl,PrevControl,_TT
-  CurrControl := A_GuiControl
-  If (CurrControl != PrevControl && !InStr(CurrControl, " "))
-    {
-    ToolTip
-    SetTimer DisplayToolTip,1000
-    PrevControl := CurrControl
-    }
-  Return
-
-  DisplayToolTip:
-    SetTimer DisplayToolTip,Off
-    ToolTip % %CurrControl%_TT
-    SetTimer RemoveToolTip,5000 ;don't like tooltips that disappear quickly...
-  Return
-
-  RemoveToolTip:
-    SetTimer RemoveToolTip,Off
-    ToolTip
-  Return
-  }
-
 /*
 by Bentschi
 https://autohotkey.com/board/topic/90266-funktionen-loadlibrary-freelibrary-schnellere-dllcalls/
@@ -683,20 +682,25 @@ https://github.com/ahkscript/ASPDM/blob/master/Local-Client/Test_Packages/loadli
 LoadLibrary(sDllName)
   {
   Static ref := {}
-  If (!(ptr := p := DllCall("LoadLibrary","str",sDllName,sPtr)))
+        ,iPtrSize92 := (A_PtrSize=4) ? 92 : 108
+        ,iPtrSize96 := (A_PtrSize=4) ? 96 : 112
+        ,iPtrSize100 := (A_PtrSize=4) ? 100 : 116
+        ,sIsUni := (A_IsUnicode) ? "W" : "A"
+        ,sPtr := (A_PtrSize ? "Ptr" : "UInt")
+  If (!(ptr := p := DllCall("LoadLibrary","Str",sDllName,sPtr)))
     Return 0
   ref[ptr,"count"] := (ref[ptr]) ? ref[ptr,"count"]+1 : 1
-  p += NumGet(p+0,0x3c,"int")+24
+  p += NumGet(p+0,0x3c,"Int")+24
   o := {_ptr:ptr,__delete:func("FreeLibrary"),_ref:ref[ptr]}
-  If (NumGet(p+0,(A_PtrSize=4) ? 92 : 108,"UInt")<1 || (ts := NumGet(p+0,(A_PtrSize=4) ? 96 : 112,"UInt")+ptr)=ptr || (te := NumGet(p+0,(A_PtrSize=4) ? 100 : 116,"UInt")+ts)=ts)
+  If (NumGet(p+0,iPtrSize92,"Uint")<1 || (ts := NumGet(p+0,iPtrSize96,"Uint")+ptr)=ptr || (te := NumGet(p+0,iPtrSize100,"Uint")+ts)=ts)
     Return o
-  n := ptr+NumGet(ts+0,32,"UInt")
-  Loop % NumGet(ts+0,24,"UInt")
+  n := ptr+NumGet(ts+0,32,"Uint")
+  Loop % NumGet(ts+0,24,"Uint")
     {
-    If (p := NumGet(n+0,(A_Index-1)*4,"UInt"))
+    If (p := NumGet(n+0,(A_Index-1)*4,"Uint"))
       {
-      o[f := StrGet(ptr+p,"cp0")] := DllCall("GetProcAddress",sPtr,ptr,"astr",f,sPtr)
-      If (Substr(f,0)==((A_IsUnicode) ? "W" : "A"))
+      o[f := StrGet(ptr+p,"cp0")] := DllCall("GetProcAddress",sPtr,ptr,"AStr",f,sPtr)
+      If (Substr(f,0)==(sIsUni))
         o[Substr(f,1,-1)] := o[f]
       }
     }
