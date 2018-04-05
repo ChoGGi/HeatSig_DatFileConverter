@@ -44,7 +44,8 @@ Else
 ;end of init section
 Return
 
-Global sHeatSigFiles,sSteamLoc,sWorkshopFiles,ScanSteamWorkshop,Editor,sSelectedTreeText
+Global sHeatSigFiles,sSteamLoc,sWorkshopFiles,ScanSteamWorkshop,Editor,sSelectedTreeText,iXPos,iYPos
+
 
 lStartGUI:
   If !FileExist(sProg_Ini)
@@ -68,7 +69,6 @@ lStartGUI:
     iYPos := 0
   If iXPos > %A_ScreenWidth%
     iXPos := 0
-
 
   ;Shamelessly borrowed/edited from Autohotkey help (tree/listview example)
   sHeatSigFiles := A_APPDATA "\Heat_Signature"
@@ -254,6 +254,7 @@ ExitApp
 lButtonClose:
 oEditorWinGuiClose:
 oEditorWinGuiEscape:
+  bEditorVisible := false
   Gui Destroy
   ;re-enable main win
   Gui 1:Default
@@ -280,7 +281,10 @@ lButtonSaveFileAs:
   ;if user didn't cancel, etc
   If sSelectedFile
     {
-    ;if .dat re-encode
+    ;if no ext then add .dat
+    If SubStr(sSelectedFile,-3,1) != .
+      sSelectedFile := sSelectedFile ".dat"
+    ;if ext is .dat then encode
     If SubStr(sSelectedFile,-3) = .dat
       fSaveEncodeText(sSelectedFile ".txt",oFileEditor)
     ;else overwrite old file
@@ -314,10 +318,17 @@ Return
 fEditorGUI(sDir,sFile,sExt)
   {
   Static oButtonClose
-  Global sDirEditorGUI,sFileListB,oFileEditor,oButtonSaveFile,oButtonSaveDatFile,oButtonSaveFileAs
+  Global bEditorVisible,sDirEditorGUI,sFileListB,oFileEditor,oButtonSaveFile,oButtonSaveDatFile,oButtonSaveFileAs
+  If bEditorVisible
+    {
+    MsgBox 4096,Opened,Editor already opened.
+    Return
+    }
+  Else
+    bEditorVisible := true
   ;disable mainwin
   WinSet Transparent,100
-  Gui +Disabled
+  ;Gui +Disabled
   ;get a list of files beforehand (to compare for new files)
   Loop Files,%sDir%\*.*
     sFileListB .= A_LoopFileName
@@ -329,7 +340,7 @@ fEditorGUI(sDir,sFile,sExt)
 
   Gui oEditorWin:Default
   Gui +LastFound +Resize +OwnDialogs
-  oButtonSaveFile := (sExt = ".dat" ? sFile sExt ".txt"
+  oButtonSaveFile := (sExt = ".dat"? sFile sExt ".txt"
     : sExt = ".old" ? sFile sExt ".txt"
     : sFile sExt)
 
@@ -349,7 +360,8 @@ fEditorGUI(sDir,sFile,sExt)
   oButtonSaveDatFile := sDir oButtonSaveDatFile ".txt"
   oButtonSaveFileAs := sDir sFile sExt
 
-  Gui Show,,Editing %sDir%\%sFile%%sExt%
+  ;Gui Show,,Editing %sDir%\%sFile%%sExt%
+  Gui Show,x%iXPos% y%iYPos%,Editing %sDir%\%sFile%%sExt%
   ;focus on edit box
   GuiControl Focus,oFileEditor
   }
